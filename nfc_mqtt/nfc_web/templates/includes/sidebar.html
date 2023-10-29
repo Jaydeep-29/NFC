@@ -1,0 +1,33 @@
+<div class="sidebar" data-color="purple" data-background-color="white" data-image="/static/assets/img/sidebar-1.jpg">
+  <div class="logo">
+    <a target="_blank" rel="noopener noreferrer" target="_blank" rel="noopener noreferrer">
+      <img src="/static/assets/img/ambipower-login-Logo.png" width="190" height="40">
+    </a>
+  </div>
+  {% if user.is_authenticated %}
+  <div class="sidebar-wrapper">
+    <ul class="nav">
+      <li class="nav-item {% if 'ui-tables' in segment %} active {% endif %}">
+       <a class="nav-link" href="{% url 'nfc' %}">
+          <i class="material-icons">content_paste</i>
+          <p>NFC</p>
+        </a> 
+      </li>
+      {% comment %} <li class="nav-item ">
+        <a class="nav-link" href="{% url 'logout' %}">
+          <i class="material-icons">directions_run</i>
+          <p>Logout</p>
+        </a>
+      </li> {% endcomment %}
+
+      <li class="nav-item active-pro ">
+        <a target="_blank" rel="noopener noreferrer" class="nav-link" href="https://ambipower.ambimat.com/">
+          <i class="material-icons">unarchive</i>
+          <p>See product</p>
+        </a>
+      </li>
+    </ul>
+  </div>
+  {% endif %}
+
+</div>

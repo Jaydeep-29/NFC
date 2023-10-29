@@ -1,0 +1,29 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Maps {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <div id="map"></div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!--  Google Maps Plugin    -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMM_FAbP7oa6l2JQ_saQxuB9DTx-GoWhM"></script>
+
+  <script>
+    $(document).ready(function() {
+      // Javascript method's body can be found in assets/js/demos.js
+      var lat = 23.026562414502926
+      var long =  72.56759310867996
+      demo.initGoogleMaps(lat,long);
+    });
+  </script>
+  
+{% endblock javascripts %}

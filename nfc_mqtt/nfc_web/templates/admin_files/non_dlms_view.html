@@ -1,0 +1,89 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Dashboard {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+
+.table-header th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #8a8a8a;
+  color: white;
+
+}
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-2">
+        <label for="">Select Meter Serial No.</label>
+        <select id="mtr_name" class="form-control dropdown" name=''>
+            <option value='null' hidden selected disabled>Select Meter No.</option>
+            {% for non_dlms_meter in non_dlms_meters %}
+            <option value={{ non_dlms_meter.meter_serial_number|safe }}>{{ non_dlms_meter.meter_serial_number }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <button type="button" id="search_id" class="btn-primary btn-sm btn">
+            <i class="fa fa-search" aria-hidden="true"></i>
+        </button>
+    </div>
+</div>
+<div class="row">
+    <table class="table table-success table-striped" id="mrd_list">
+        <thead>
+          <th scope="col">
+            Meter No.
+          </th>
+          <th scope="col">
+            Created Time
+          </th>
+          <th scope="col">
+            Download
+          </th>
+        </thead>
+        <tbody id='tbody'>
+        </tbody>
+      </table>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+    // insert data in table
+    $(document).ready(function () {
+        $('#search_id').click(function (e) {
+            var mtr_name = $('#mtr_name').val();
+            var mrd_file_list = "";
+            if (mtr_name != null) {
+                mydata = { 'mtr_name': mtr_name,};
+                $.ajax({
+                  url: "{% url 'non_dlms_search' %}",
+                  method: "POST",
+                  headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                  },
+                  data: mydata,
+                  success: function (data) {
+                    console.log(data);
+                    non_dlms_meters_data = data.non_dlms_meters_data
+                    for (i = 0; i < non_dlms_meters_data.length; i++) {
+                        mrd_file_list += "<tr><td>" + non_dlms_meters_data[i].meter_serial_number + "</td><td>" + non_dlms_meters_data[i].read_dt + "</td><td> <p> <a href =" + non_dlms_meters_data[i].mrd_file_link + "> Download</a>.</p> </td></tr><tr>"
+                    }
+                    $('#mrd_list > tbody ').html(mrd_file_list);
+                  },
+                });
+              };
+        })
+
+    });
+</script>
+{% endblock javascripts %}

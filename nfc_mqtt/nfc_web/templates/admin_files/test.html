@@ -1,0 +1,1286 @@
+{% extends 'layouts/base.html' %}
+
+{% block stylesheets %}
+<style>
+  .dropdown {
+    width: 100%;
+    padding: 8px;
+    margin: 3px 0 0px 0;
+    border: none;
+    background: #e0dcdc;
+  }
+
+  .chart-container {
+    height: 480px;
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+  }
+
+  .pie-chart-container {
+    height: 360px;
+    width: 360px;
+  }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+<form class="form-container edit" method="post" action="{% url 'download_profiles' %}"> {% csrf_token %}
+  <div id="container" style="width:75%;">
+    <div class="row">
+      <div class="col-md-3">
+        <label for="" id="">Meter No.</label>
+        <select id="mtr_name" class="form-control dropdown" name='mtr_name'>
+          <option value='null' hidden selected disabled>Select Meter No.</option>
+          {% for d in mtr_sr %}
+          <option value={{ d.meter_serial_no|safe }}>{{ d.meter_serial_no }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label for="">Source Name</label>
+        <select id="source_id" class="form-control dropdown" name='source_name'>
+          <option value='null' hidden selected disabled>Select Source Name</option>
+          <option value="0">Bluetooth</option>
+          <option value="1">USB</option>
+          <option value="2">GSM</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label for="">Transaction Date</label>
+        <select id="date_id" class="form-control dropdown" name='date_name'>
+          <option value='null' hidden selected disabled>Select Date</option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <button type="button" id="btn_id" class="btn-success btn-sm btn">
+          <i class="fa fa-search" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="btn-success btn-sm btn" data-toggle="modal" data-target="#profileModal">
+          <i class="fa fa-download" aria-hidden="true"></i>
+        </button>
+        <div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="profileModalLabel">Select Profile</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="col-md-6">
+                <label for="">Profile Name</label>
+                <select class="form-control dropdown" name="profile_name">
+                  <option value='1'>Name Profile</option>
+                  <option value='2'>Instaneous Profile</option>
+                  <option value='3'>Event Profile</option>
+                  <option value='4'>Load Profile</option>
+                  <option value='5'>Billing Profile</option>
+                  <option value='6'>THD Profile</option>
+                  <option value='7'>TOD Profile</option>
+                </select>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn-danger btn-sm btn" data-dismiss="modal">Close</button>
+                <button type="submit" id="download_id" class="btn-success btn-sm btn">
+                  Download
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+<div class="row">
+  <div class="col-5">
+    <div>
+      <h5><b>Name Profile</b></h5>
+    </div>
+    <table class="table table-success table-striped" id="name_profile_table">
+      <thead>
+        <th scope="col">
+          <strong>Parameter</strong>
+        </th>
+        <th scope="col">
+          <strong>Value</strong>
+        </th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-6">
+    <div>
+      <h5><b>Instaneous Profile</b></h5>
+    </div>
+    <div class="col-12">
+      <!--<div class="col-5">-->
+      <table class="table table-success table-striped" id="inst_pt1_profile_table">
+        <thead>
+          <th scope="col">
+            <strong></strong>
+          </th>
+          <th scope="col">
+            <strong>R</strong>
+          </th>
+          <th scope="col">
+            <strong>Y</strong>
+          </th>
+          <th scope="col">
+            <strong>B</strong>
+          </th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
+      <table class="table table-success table-striped" id="inst_pt2_profile_table">
+        <thead>
+          <th scope="col">
+            <strong>Parameter</strong>
+          </th>
+          <th scope="col">
+            <strong>Value</strong>
+          </th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <!-- </div> <!-->
+    </div>
+
+    <div class="col-12">
+      <table class="table table-success table-striped" id="inst_st2_profile_table">
+        <thead>
+          <th scope="col">
+            <strong>Parameter</strong>
+          </th>
+          <th scope="col">
+            <strong>Value</strong>
+          </th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <!-- </div>
+    <div class="col-5"> -->
+      <table class="table table-success table-striped" id="inst_st1_profile_table">
+        <thead>
+          <th scope="col">
+            <strong></strong>
+          </th>
+          <th scope="col">
+            <strong>Phase 1</strong>
+          </th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div>
+    <h5><b>Event Profile</b></h5>
+  </div>
+  <table class="table table-success table-striped" id="event_profile_table">
+    <thead>
+      <th scope="col">
+        <strong>Event Name</strong>
+      </th>
+      <th scope="col">
+        <strong>Event Occurence</strong>
+      </th>
+      <th scope="col">
+        <strong>Event Time</strong>
+      </th>
+      <th scope="col">
+        <strong>View</strong>
+      </th>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="row">
+  <div class="col-md-12"></div>
+  <label for="">Select Load Profile Date</label>
+  <select id="load_date_id" class="form-control dropdown" name=''> </select>
+  <canvas id="load_profile_chart" aria-label="chart" role="img" width="500" height="250"></canvas>
+</div>
+</div>
+<div class="row">
+  <div class="col-md-5">
+    <canvas id="bill_profile_chart" aria-label="chart" role="img" width="500" height="250"></canvas>
+  </div>
+  <div class="col-md-2">
+    <div id="billing_radio_id" style="text-align:center;color:black;">
+      <form class="type">
+        <input type="radio" name="type" checked="checked" value="kwh">kwh</input>
+        <input type="radio" name="type" value="kvah">kvah</input>
+      </form>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <canvas id="bill_cons_profile_chart" aria-label="chart" role="img" width="500" height="250"></canvas>
+  </div>
+</div>
+<div class="chart-container">
+  <div class="col-md-6">
+    <canvas id="tod_profile_chart" aria-label="chart"></canvas>
+    <label for="">Billing Month</label>
+    <select id="tod_selection_id" class="form-control dropdown" name='tod_selection_name'>
+    </select>
+  </div>
+</div>
+
+<!-- <div class="row">
+  <div class="col-5">
+    <table class="table table-success table-striped" id="name_profile_table">
+      <thead>
+        <th scope="col">
+          <strong>Parameter</strong>
+        </th>
+        <th scope="col">
+          <strong>Value</strong>
+        </th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-6">
+    <table class="table table-success table-striped" id="event_profile_table">
+      <thead>
+        <th scope="col">
+          <strong>Event Name</strong>
+        </th>
+        <th scope="col">
+          <strong>Event Occurence</strong>
+        </th>
+        <th scope="col">
+          <strong>Event Time</strong>
+        </th>
+        <th scope="col">
+          <strong>View</strong>
+        </th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div> -->
+
+<!--inst table -->
+<div class="row">
+  <div class="col-6">
+    <table class="table table-success table-striped" id="inst_pt2_profile_table">
+      <thead>
+        <th scope="col">
+          <strong>Parameter</strong>
+        </th>
+        <th scope="col">
+          <strong>Value</strong>
+        </th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <!-- </div>
+    <div class="col-5"> -->
+    <table class="table table-success table-striped" id="inst_pt1_profile_table">
+      <thead>
+        <th scope="col">
+          <strong></strong>
+        </th>
+        <th scope="col">
+          <strong>R</strong>
+        </th>
+        <th scope="col">
+          <strong>Y</strong>
+        </th>
+        <th scope="col">
+          <strong>B</strong>
+        </th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col-7">
+    <table class="table table-success table-striped" id="inst_st2_profile_table">
+      <thead>
+        <th scope="col">
+          <strong>Parameter</strong>
+        </th>
+        <th scope="col">
+          <strong>Value</strong>
+        </th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <!-- </div>
+  <div class="col-5"> -->
+    <table class="table table-success table-striped" id="inst_st1_profile_table">
+      <thead>
+        <th scope="col">
+          <strong></strong>
+        </th>
+        <th scope="col">
+          <strong>Phase 1</strong>
+        </th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-6">
+    <!-- <table class="table table-success table-striped" id="event_profile_table">
+      <thead>
+        <th scope="col">
+          <strong>Event Name</strong>
+        </th>
+        <th scope="col">
+          <strong>Event Occurence</strong>
+        </th>
+        <th scope="col">
+          <strong>Event Time</strong>
+        </th>
+        <th scope="col">
+          <strong>View</strong>
+        </th>
+      </thead>
+      <tbody>
+      </tbody>
+    </table> -->
+
+    <!-- voltage event Modal -->
+    <div class="modal" id="vol_e_Modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title"></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">
+            <table class="table table-striped" id="vol_event_table_id">
+              <thead>
+                <th scope="col">
+                  <strong>Event Occurence</strong>
+                </th>
+                <th scope="col">
+                  <strong>Event Time</strong>
+                </th>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+    <!-- power event Modal -->
+    <div class="modal" id="pwr_e_Modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!--power event Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title"></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!--power event Modal body -->
+          <div class="modal-body">
+            <table class="table table-striped" id="pwr_event_table_id">
+              <thead>
+                <th scope="col">
+                  <strong>Event Occurence</strong>
+                </th>
+                <th scope="col">
+                  <strong>Event Time</strong>
+                </th>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- current  event Modal -->
+    <div class="modal" id="cur_e_Modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!--current  event Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title"></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!--current  event Modal body -->
+          <div class="modal-body">
+            <table class="table table-striped" id="cur_event_table_id">
+              <thead>
+                <th scope="col">
+                  <strong>Event Occurence</strong>
+                </th>
+                <th scope="col">
+                  <strong>Event Time</strong>
+                </th>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+          <!--current event Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- transation  event Modal -->
+    <div class="modal" id="tran_e_Modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!--transation  event Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title"></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!--transation  event Modal body -->
+          <div class="modal-body">
+            <table class="table table-striped" id="tran_event_table_id">
+              <thead>
+                <th scope="col">
+                  <strong>Event Occurence</strong>
+                </th>
+                <th scope="col">
+                  <strong>Event Time</strong>
+                </th>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+          <!--transation event Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- other event Modal -->
+    <div class="modal" id="other_e_Modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!--other event Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title"></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!--other event Modal body -->
+          <div class="modal-body">
+            <table class="table table-striped" id="other_event_table_id">
+              <thead>
+                <th scope="col">
+                  <strong>Event Occurence</strong>
+                </th>
+                <th scope="col">
+                  <strong>Event Time</strong>
+                </th>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+          <!--other event Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- non rollover event Modal -->
+    <div class="modal" id="non_e_Modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!--non rollover event Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title"></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!--non rollover event Modal body -->
+          <div class="modal-body">
+            <table class="table table-striped" id="non_event_table_id">
+              <thead>
+                <th scope="col">
+                  <strong>Event Occurence</strong>
+                </th>
+                <th scope="col">
+                  <strong>Event Time</strong>
+                </th>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+          <!--non rollover event Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- control event Modal -->
+    <div class="modal" id="con_e_Modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!--control event Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title"></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!--control event Modal body -->
+          <div class="modal-body">
+            <table class="table table-striped" id="con_event_table_id">
+              <thead>
+                <th scope="col">
+                  <strong>Event Occurence</strong>
+                </th>
+                <th scope="col">
+                  <strong>Event Time</strong>
+                </th>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+          <!--control event Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- <canvas id="chart_test" aria-label="chart" role="img" width="500" height="300"></canvas> -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.2/chart.min.js"></script>
+<!-- <script src="path/to/chartjs-plugin-zoom/dist/chartjs-plugin-zoom.min.js"></script> -->
+<script>
+  //$(function () {
+  // $(document).ready(function () {
+  //   var $populationChart = $("#population-chart");
+  //   $('#source_id').trigger('click');
+  //   $.ajax({
+  //     url: $populationChart.data("url"),
+  //     success: function (data) {
+
+  //       var ctx = $populationChart[0].getContext("2d");
+
+  //       new Chart(ctx, {
+  //         type: 'bar',
+  //         data: {
+  //           labels: data.labels,
+  //           datasets: [{
+  //             label: 'Population',
+  //             backgroundColor: '#6fae3f',
+  //             data: data.data
+  //           }]
+  //         },
+  //         options: {
+  //           responsive: true,
+  //           legend: {
+  //             position: 'top',
+  //           },
+  //           title: {
+  //             display: true,
+  //             text: 'Population Bar Chart'
+  //           }
+  //         }
+  //       });
+
+  //     }
+  //   });
+  // });
+
+  $(document).ready(function () {
+    var gs_load_chart = document.getElementById('load_profile_chart').getContext("2d");
+    var gs_bill_chart = document.getElementById('bill_profile_chart').getContext("2d");
+    var gs_bill_cons_chart = document.getElementById('bill_cons_profile_chart').getContext("2d");
+    var gs_tod_chart = document.getElementById('tod_profile_chart').getContext("2d");
+    $("#inst_st1_profile_table").hide();
+    $("#inst_st2_profile_table").hide();
+    $("#inst_pt1_profile_table").hide();
+    $("#inst_pt2_profile_table").hide();
+
+    var load_chart = new Chart(gs_load_chart, {
+      type: "bar",
+      data: {
+        labels: '',
+        datasets: [{
+          label: 'Load Profile(kw)',
+          backgroundColor: '#AE2418',
+          data: '',
+        }]
+      },
+      options: {
+        pan: {
+          enabled: true,
+          mode: 'x',
+        },
+        zoom: {
+          wheel: {
+            enabled: true,
+            mode: 'xy',
+            thresold: 10
+          },
+        },
+        responsive: true,
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'Load Profile'
+        },
+        scales: {
+          yAxes: {
+            stacked: false,
+            scaleLabel: {
+              display: true,
+              fontColor: 'white',
+              fontSize: 25,
+              labelString: 'Faction Points'
+            },
+            ticks: {
+              fontColor: 'white',
+              fontSize: 20,
+              min: 0
+            },
+            gridLines: {
+              color: 'white'
+            }
+          },
+          xAxes: {
+            stacked: false,
+            scaleLabel: {
+              display: true,
+              fontColor: 'white',
+              fontSize: 25,
+              labelString: 'Day'
+            },
+            ticks: {
+              fontColor: 'white',
+              fontSize: 20,
+              min: 0
+            }
+          }
+        }
+      }
+    });
+
+    // billing reading chart
+    var bill_chart = new Chart(gs_bill_chart, {
+      type: "bar",
+      data: {
+        labels: '',
+        datasets: [{
+          label: 'Billing Profile Reading',
+          backgroundColor: '#AE2418',
+          data: '',
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        },
+        plugins: {
+          zoom: {
+            zoom: {
+              wheel: {
+                enabled: true,
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'xy',
+            }
+          }
+        }
+      }
+    });
+
+    // billing consuption chart
+    var bill_cons_chart = new Chart(gs_bill_cons_chart, {
+      type: "bar",
+      data: {
+        labels: '',
+        datasets: [{
+          label: 'Billing Profile consumption',
+          backgroundColor: '#AE2418',
+          data: '',
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        },
+        pan: {
+          enabled: true,
+          mode: 'x',
+        },
+        zoom: {
+          enabled: true,
+          mode: 'x',
+        },
+        responsive: true,
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'Consumption Profile'
+        }
+      }
+    });
+
+
+    // tod profile_name
+    var tod_chart = new Chart(gs_tod_chart, {
+      type: "pie",
+      data: {
+        labels: '',
+        datasets: [{
+          label: 'TOD Profile',
+          backgroundColor: ["#A02828", "#E1343F", "#DE7C7C",],
+          data: '',
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+            display: true,
+          },
+          title: {
+            display: true,
+            text: 'TOD Profile'
+          }
+        }
+      },
+    });
+
+    // source name selection 
+    $("#source_id").click(function () {
+      var mtr_name = $('#mtr_name').val();
+      var source_id = $('#source_id').val();
+      console.log(source_id, mtr_name)
+      if (mtr_name != null && source_id != null) {
+        mydata = { 'mtr_name': mtr_name, 'source_id': source_id, };
+        $.ajax({
+          url: "{% url 'search_profiles' %}",
+          method: "POST",
+          headers: {
+            "X-CSRFToken": '{{ csrf_token }}'
+          },
+          data: mydata,
+          success: function (data) {
+            //console.log(data);
+            var objData = data.data;
+            $('#date_id').empty();
+            if (data.status == 1) {
+              console.log("successfully");
+              //alert(Date('(2021, 12, 21, 4, 30, 23)'));
+              for (i = 0; i < objData.length; i++) {
+                $('#date_id').append($('<option>',
+                  {
+                    value: objData[i].event_datetime,
+                    text: (objData[i].event_datetime)
+                  }));
+              }
+            }
+            if (data.status == 0) {
+              console.log("unable")
+            }
+
+          },
+        });
+
+      }
+
+    });
+
+    $("#btn_id").click(function () {
+      var mtr_name = $('#mtr_name').val();
+      var source_id = $('#source_id').val();
+      var date_id = $('#date_id').val();
+      var output = "";
+      var vol_profile = "";
+      var pwr_profile = "";
+      var tran_profile = "";
+      var cur_profile = "";
+      var tran_profile = "";
+      var other_profile = "";
+      var non_profile = "";
+      var con_profile = "";
+
+      // var $lp_Chart = $("#load_profile_chart");
+      //var $bill_Chart = $("#bill_profile_chart");
+      console.log(source_id, mtr_name)
+      $('#name_profile_table tbody').empty();
+      $('#inst_pt1_profile_table tbody').empty();
+      $('#inst_pt2_profile_table tbody').empty();
+      $('#inst_st1_profile_table tbody').empty();
+      $('#inst_st2_profile_table tbody').empty();
+
+      // hide table of saral & premire meter
+      $("#inst_st1_profile_table").hide();
+      $("#inst_st2_profile_table").hide();
+      $("#inst_pt1_profile_table").hide();
+      $("#inst_pt2_profile_table").hide();
+
+      if (mtr_name != null && source_id != null) {
+        mydata = { 'mtr_name': mtr_name, 'source_id': source_id, "date_id": date_id };
+        $.ajax({
+          url: "{% url 'django_chart' %}",
+          method: "POST",
+          headers: {
+            "X-CSRFToken": '{{ csrf_token }}'
+          },
+          data: mydata,
+          success: function (data) {
+            console.log(data)
+            $('#load_date_id').empty();
+            $('#tod_selection_id').empty();
+            var vol_e = data.vol_query_list;
+            var pwr_e = data.pwr_query_list;
+            var cur_e = data.cur_query_list;
+            var tran_e = data.tran_query_list;
+            var other_e = data.other_query_list;
+            var non_e = data.non_query_list;
+            var con_e = data.con_query_list;
+            var name_p = data.name_profile_query_list;
+            var inst_pt1 = data.inst_p_query;
+            var inst_st1 = data.inst_s_query;
+
+
+            // alert(objData.length)
+            {
+              load_chart.data.labels = data.lp_labels;
+              load_chart.data.datasets[0].data = data.lp_data;
+              load_chart.update();
+
+              // billing reading chart
+              bill_chart.data.labels = data.bill_p_labels;
+              bill_chart.data.datasets[0].data = data.bill_p_data;
+              bill_chart.update();
+
+              // billing consuption chart
+              bill_cons_chart.data.labels = data.bill_p_labels;
+              bill_cons_chart.data.datasets[0].data = data.cons_month_kwh;
+              bill_cons_chart.update();
+
+              // tod profile chart
+              tod_chart.data.labels = data.tod_lables;
+              tod_chart.data.datasets[0].data = data.data_high_list;
+              tod_chart.update();
+
+            }
+            // voltage event
+            for (i = 0; i < vol_e.length; i++) {
+              output += "<tr><td>" + vol_e[i].vol_event_name + "</td><td>" + vol_e[i].vol_event_dt + "</td></tr>"
+              if (i == 0) {
+                vol_profile = "<tr><td>" + 'Voltage Profile' + "</td><td>" + vol_e[i].vol_event_name + "</td><td>" + vol_e[i].vol_event_dt + "</td><td><button type='button' class='btn btn-info btn-sm btn-info' data-toggle='modal' data-target='#vol_e_Modal'><i class='fa fa-info' aria-hidden='true'></i></button></td>"
+
+              }
+            }
+            $('#vol_event_table_id > tbody').html(output);
+            $('#event_profile_table > tbody').html(vol_profile);
+
+            // power event
+            output = ''
+            for (i = 0; i < pwr_e.length; i++) {
+              output += "<tr><td>" + pwr_e[i].pwr_event_name + "</td><td>" + pwr_e[i].pwr_event_dt + "</td></tr>"
+              if (i == 0) {
+                pwr_profile = "<tr><td>" + 'Power Profile' + "</td><td>" + pwr_e[i].pwr_event_name + "</td><td>" + pwr_e[i].pwr_event_dt + "</td><td><button type='button' class='btn btn-info btn-sm btn-info' data-toggle='modal' data-target='#pwr_e_Modal'><i class='fa fa-info' aria-hidden='true'></i></button></td>"
+              }
+            }
+            $('#pwr_event_table_id > tbody ').html(output);
+            $('#event_profile_table > tbody').append(pwr_profile);
+
+
+            // current event
+            output = ''
+            for (i = 0; i < cur_e.length; i++) {
+              output += "<tr><td>" + cur_e[i].cur_event_name + "</td><td>" + cur_e[i].cur_event_dt + "</td></tr>"
+              if (i == 0) {
+                cur_profile = "<tr><td>" + 'Current Profile' + "</td><td>" + cur_e[i].cur_event_name + "</td><td>" + cur_e[i].cur_event_dt + "</td><td><button type='button' class='btn btn-info btn-sm btn-info' data-toggle='modal' data-target='#cur_e_Modal'><i class='fa fa-info' aria-hidden='true'></i></button></td>"
+              }
+            }
+            $('#cur_event_table_id > tbody ').html(output);
+            $('#event_profile_table > tbody').append(cur_profile);
+
+            // transsations event
+            output = ''
+            for (i = 0; i < tran_e.length; i++) {
+              output += "<tr><td>" + tran_e[i].tran_event_name + "</td><td>" + tran_e[i].tran_event_dt + "</td></tr>"
+              if (i == 0) {
+                tran_profile = "<tr><td>" + 'Transaction Profile' + "</td><td>" + tran_e[i].tran_event_name + "</td><td>" + tran_e[i].tran_event_dt + "</td><td><button type='button' class='btn btn-info btn-sm btn-info' data-toggle='modal' data-target='#tran_e_Modal'><i class='fa fa-info' aria-hidden='true'></i></button></td>"
+              }
+            }
+            $('#tran_event_table_id > tbody ').html(output);
+            $('#event_profile_table > tbody').append(tran_profile);
+
+            // other event
+            output = ''
+            for (i = 0; i < other_e.length; i++) {
+              output += "<tr><td>" + other_e[i].other_event_name + "</td><td>" + other_e[i].other_event_dt + "</td></tr>"
+              if (i == 0) {
+                other_profile = "<tr><td>" + 'Other Profile' + "</td><td>" + other_e[i].other_event_name + "</td><td>" + other_e[i].other_event_dt + "</td><td><button type='button' class='btn btn-info btn-sm btn-info' data-toggle='modal' data-target='#other_e_Modal'><i class='fa fa-info' aria-hidden='true'></i></button></td>"
+              }
+            }
+            $('#other_event_table_id > tbody ').html(output);
+            $('#event_profile_table > tbody').append(other_profile);
+
+            // non-roll over event
+            output = ''
+            for (i = 0; i < non_e.length; i++) {
+              output += "<tr><td>" + non_e[i].non_roll_event_name + "</td><td>" + non_e[i].non_roll_event_dt + "</td></tr>"
+              if (i == 0) {
+                non_profile = "<tr><td>" + 'Non-Rollover Profile' + "</td><td>" + non_e[i].non_roll_event_name + "</td><td>" + non_e[i].non_roll_event_dt + "</td><td><button type='button' class='btn btn-info btn-sm btn-info' data-toggle='modal' data-target='#non_e_Modal'><i class='fa fa-info' aria-hidden='true'></i></button></td>"
+              }
+            }
+            $('#non_event_table_id > tbody ').html(output);
+            $('#event_profile_table > tbody').append(non_profile);
+
+
+            // control event
+            output = ''
+            for (i = 0; i < con_e.length; i++) {
+              output += "<tr><td>" + con_e[i].control_event_name + "</td><td>" + con_e[i].control_event_dt + "</td>"
+              if (i == 0) {
+                con_profile = "<tr><td>" + 'Control Profile' + "</td><td>" + con_e[i].control_event_name + "</td><td>" + con_e[i].control_event_dt + "</td><td><button type='button' class='btn btn-info btn-sm btn-info' data-toggle='modal' data-target='#con_e_Modal'><i class='fa fa-info' aria-hidden='true'></i></button></td>"
+              }
+            }
+            $('#con_event_table_id > tbody ').html(output);
+            $('#event_profile_table > tbody').append(con_profile);
+
+            // tod profile selection menu
+            for (i = 0; i < data.tod_selection.length; i++) {
+              $('#tod_selection_id').append($('<option>',
+                {
+                  value: data.tod_selection[i],
+                  text: data.tod_selection[i]
+                }));
+            }
+
+            // load profile date selection
+            for (i = 0; i < data.load_profile_date.length; i++) {
+              $('#load_date_id').append($('<option>',
+                {
+                  value: data.load_profile_date[i],
+                  text: data.load_profile_date[i]
+                }));
+            }
+
+            // Name profile 
+            output = ''
+            output += "<tr><td>" + 'Logical Device Name' + "</td><td>" + name_p.logical_device_name + "</td></tr><td>" + 'Meter Serial No.' + "</td><td>" + name_p.meter_serial_number + "</td></tr><td>" + 'Manufacturer Name' + "</td><td>" + name_p.manuf_name + "</td></tr><td>" + 'firmware Version' + "</td><td>" + name_p.appli_firmware_clem_name + "</td></tr><td>" + 'Meter Type' + "</td><td>" + name_p.meter_type + "</td></tr><td>" + 'Internal CT Ratio' + "</td><td>" + name_p.meter_ct_ratio + "</td></tr><td>" + 'Internal PT Ratio' + "</td><td>" + name_p.meter_pt_ratio + "</td></tr><td>" + 'Category' + "</td><td>" + name_p.category + "</td></tr><td>" + 'Current Rating' + "</td><td>" + name_p.current_rating + "</td></tr><td>" + 'Manufacture Year' + "</td><td>" + name_p.meter_year_of_manuf + "</td></tr>"
+            $('#name_profile_table > tbody').append(output);
+
+            // alert(inst_pt1)
+            if (inst_pt1 != '') {
+              // inst pt1 table
+              output = ''
+              output += "<tr><td>" + 'Voltage(V)' + "</td><td>" + (Number(inst_pt1[0].vl_p1).toFixed(2)) + "</td><td>" + Number(inst_pt1[0].vl_p2).toFixed(2) + "</td><td>" + Number(inst_pt1[0].vl_p3).toFixed(2) + "</td></tr>" + "<tr><td>" + 'Current(c)' + "</td><td>" + Number(inst_pt1[0].line_current_p1).toFixed(2) + "</td><td>" + Number(inst_pt1[0].line_current_p2).toFixed(2) + "</td><td>" + Number(inst_pt1[0].line_current_p3).toFixed(2) + "</td></tr>" + "<tr><td>" + 'Power Factor(Pf)' + "</td><td>" + Number(inst_pt1[0].pf_p1).toFixed(2) + "</td><td>" + Number(inst_pt1[0].pf_p2).toFixed(2) + "</td><td>" + Number(inst_pt1[0].pf_p3).toFixed(2) + "</td></tr>"
+              $('#inst_pt1_profile_table > tbody').append(output);
+
+              // inst pt2 table
+              output = ''
+              output += "<tr><td>" + 'Active Power-KW' + "</td><td>" + Number(inst_pt1[0].active_pwr).toFixed(2) + "</td></tr><td>" + 'Apparent Power-KVA' + "</td><td>" + Number(inst_pt1[0].apparent_pwr).toFixed(2) + "</td></tr><td>" + 'Max Demand KW' + "</td><td>" + Number(inst_pt1[0].max_demand_kw).toFixed(2) + "</td></tr><td>" + 'MD KW Occ. Date time' + "</td><td>" + inst_pt1[0].max_demand_kw_occu_dt + "</td></tr><td>" + 'Max Demand KVA' + "</td><td>" + Number(inst_pt1[0].md_kva).toFixed(2) + "</td></tr><td>" + 'MD KVA Occ. Date time' + "</td><td>" + inst_pt1[0].md_kva_dt + "</td></tr><td>" + 'Meter Date and Time' + "</td><td>" + inst_pt1[0].real_time_clock_dt + "</td></tr><td>" + 'Device Date and Time' + "</td><td>" + inst_pt1[0].mobile_real_time_clock_dt + "</td></tr><td>" + '3 Phase pf' + "</td><td>" + Number(inst_pt1[0].avg_pf).toFixed(2) + "</td></tr>"
+              $('#inst_pt2_profile_table > tbody').append(output);
+              $("#inst_pt1_profile_table").show();
+              $("#inst_pt2_profile_table").show();
+
+            }
+
+            else if (inst_st1 != '') {
+              // alert("else")
+              $("#inst_st1_profile_table").show();
+              $("#inst_st2_profile_table").show();
+              // inst st1 table
+              output = ''
+              output += "<tr><td>" + 'Voltage(V)' + "</td><td>" + (Number(inst_st1[0].voltage).toFixed(2)) + "</td></tr>" + "<tr><td>" + 'Current(i)' + "</td><td>" + Number(inst_st1[0].phase_current).toFixed(2) + "</td></tr>" + "<tr><td>" + 'Power Factor(Pf)' + "</td><td>" + Number(inst_st1[0].avg_power_factor).toFixed(2) + "</td></tr>"
+              $('#inst_st1_profile_table > tbody').append(output);
+
+              // inst st2 table
+              output = ''
+              output += "<tr><td>" + 'Active Power-KW' + "</td><td>" + (inst_st1[0].app_power_kva) + "</td></tr><td>" + 'Abs Apparent (Kvah)' + "</td><td>" + Number(inst_st1[0].abs_apparent_kvah).toFixed(2) + "</td></tr><td>" + 'Meter Date and Time' + "</td><td>" + inst_st1[0].real_time_clock_date_and_time + "</td></tr><td>" + 'Device Date and Time' + "</td><td>" + inst_st1[0].mobile_real_time_clock_date_and_time + "</td></tr>"
+              $('#inst_st2_profile_table > tbody').append(output);
+
+            }
+
+            // var ctx = document.getElementById('load_profile_chart').getContext("2d");
+            // var bill_ctx = document.getElementById('bill_profile_chart').getContext("2d");
+            // console.log(data)
+            // var c_test = new Chart(ctx, {
+            //   type: 'bar',
+            //   data: {
+            //     labels: data.lp_labels,
+            //     datasets: [{
+            //       label: 'Load Profile',
+            //       backgroundColor: '#6fae3f',
+            //       data: data.lp_data
+            //     }]
+            //   },
+            //   options: {
+            //     pan: {
+            //       enabled: true,
+            //       mode: 'x',
+            //     },
+            //     zoom: {
+            //       enabled: true,
+            //       mode: 'x',
+            //     },
+            //     responsive: true,
+            //     legend: {
+            //       position: 'top',
+            //     },
+            //     title: {
+            //       display: true,
+            //       text: 'Load Profile'
+            //     }
+            //   }
+
+            // });
+
+            // billing chart
+            // new Chart(bill_ctx, {
+            //   type: 'bar',
+            //   data: {
+            //     labels: data.bill_p_labels,
+            //     datasets: [{
+            //       label: 'Billing Profile',
+            //       backgroundColor: '#6fae3f',
+            //       data: data.bill_p_data
+            //     }]
+            //   },
+            //   options: {
+            //     pan: {
+            //       enabled: true,
+            //       mode: 'x',
+            //     },
+            //     zoom: {
+            //       enabled: true,
+            //       mode: 'x',
+            //     },
+            //     responsive: true,
+            //     legend: {
+            //       position: 'top',
+            //     },
+            //     title: {
+            //       display: true,
+            //       text: 'Billing Profile'
+            //     }
+            //   }
+
+            // });
+
+          }
+
+        })
+      }
+    })
+
+    // tod selection click event
+    $("#tod_selection_id").click(function () {
+      var mtr_name = $('#mtr_name').val();
+      var source_id = $('#source_id').val();
+      var date_id = $('#date_id').val();
+      var tod_selection = $('#tod_selection_id').val();
+
+      if (tod_selection != null) {
+        mydata = { 'mtr_name': mtr_name, 'source_id': source_id, 'date_id': date_id, 'tod_selection': tod_selection };
+        $.ajax({
+          url: "{% url 'tod_chart' %}",
+          method: "POST",
+          headers: {
+            "X-CSRFToken": '{{ csrf_token }}'
+          },
+          data: mydata,
+          success: function (data) {
+            console.log(data);
+            var objData = data.data_high_list;
+            if (data.status == 1) {
+              console.log(" successfully");
+              for (i = 0; i < objData.length; i++) {
+                $('#date_id').append($('<option>',
+                  {
+                    value: objData[i].event_datetime,
+                    text: objData[i].event_datetime
+                  }));
+              }
+              console.log(objData)
+              // tod profile chart
+              tod_chart.data.datasets[0].data = data.data_high_list;
+              tod_chart.update();
+
+            }
+            if (data.status == 0) {
+              console.log("unable")
+            }
+
+          },
+        });
+      };
+    })
+
+    // Date Selection in Load Profile 
+    $("#load_date_id").click(function () {
+      var mtr_name = $('#mtr_name').val();
+      var source_id = $('#source_id').val();
+      var date_id = $('#date_id').val();
+      var load_date_select = $('#load_date_id').val();
+      if (load_date_select != null) {
+        mydata = { 'mtr_name': mtr_name, 'source_id': source_id, 'date_id': date_id, 'load_date_select': load_date_select };
+        $.ajax({
+          url: "{% url 'load_profile' %}",
+          method: "POST",
+          headers: {
+            "X-CSRFToken": '{{ csrf_token }}'
+          },
+          data: mydata,
+          success: function (data) {
+            // console.log(data);
+            load_chart.data.labels = data.lp_labels;
+            load_chart.data.datasets[0].data = data.lp_data;
+            load_chart.update();
+
+            // if (data.status == 1) {
+            //   console.log(" successfully");
+            //   for (i = 0; i < objData.length; i++) {
+            //     $('#date_id').append($('<option>',
+            //       {
+            //         value: objData[i].event_datetime,
+            //         text: objData[i].event_datetime
+            //       }));
+            //   }
+            //   console.log(objData)
+            //   // tod profile chart
+            //   tod_chart.data.datasets[0].data = data.data_high_list;
+            //   tod_chart.update();
+
+            // }
+            // if (data.status == 0) {
+            //   console.log("unable")
+            // }
+
+          },
+        });
+      };
+    })
+
+    // Meter serial no. Selection
+    $("#mtr_name").click(function () {
+      $('#source_id').trigger('click');
+
+    })
+
+    // $("#kwh_radio").click(function () {
+    //   alert("hi")
+    // })
+
+    $("#billing_radio_id input[name='type']").click(function () {
+      // alert('You clicked radio!');
+      // if($('input:radio[name=type]:checked').val() == "kvah"){
+      // alert($('input:radio[name=type]:checked').val());
+      //$('#select-table > .roomNumber').attr('enabled',false);
+      var mtr_name = $('#mtr_name').val();
+      var source_id = $('#source_id').val();
+      var date_id = $('#date_id').val();
+      var billing_sele = $('input:radio[name=type]:checked').val();
+      mydata = { 'mtr_name': mtr_name, 'source_id': source_id, 'date_id': date_id, 'billing_sele': billing_sele };
+      $.ajax({
+        url: "{% url 'billing_profile' %}",
+        method: "POST",
+        headers: {
+          "X-CSRFToken": '{{ csrf_token }}'
+        },
+        data: mydata,
+        success: function (data) {
+          console.log(data);
+          // billing reading chart
+          bill_chart.data.labels = data.bill_p_labels;
+          bill_chart.data.datasets[0].data = data.bill_p_data;
+          bill_chart.update();
+
+          // billing consuption chart
+          bill_cons_chart.data.labels = data.bill_p_labels;
+          bill_cons_chart.data.datasets[0].data = data.cons_month_kvah;
+          bill_cons_chart.update();
+
+        },
+      });
+      // }
+    });
+
+
+  });
+
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8" />
+  <link rel="apple-touch-icon" sizes="76x76" href="/static/assets/img/apple-icon.png">
+  <link rel="icon" type="image/png" href="/static/assets/img/ambipower-login-ambipower.png">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <title>
+    Dashboard - {% block title %}{% endblock %}
+  </title>
+
+  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no'
+    name='viewport' />
+  <!--     Fonts and icons     -->
+  <link rel="stylesheet" type="text/css"
+    href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+  <!-- CSS Files -->
+  <link href="/static/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+  <!-- CSS Just for demo purpose, don't include it in your project -->
+
+
+  <style>
+    .login-popup {
+      position: absolute;
+      left: 230px;
+      top: 130px;
+
+    }
+
+    .login_contain {
+      position: relative;
+    }
+  </style>
+
+</head>
+
+<body class="">
+  <div class="wrapper ">
+    <img src="/static/assets/img/ambipower-login-Logo.png" class="img-responsive" alt="ambi_logo" width="150"
+      height="40">
+    <div class="main-panel">
+      <div class="content login_contain">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-5 login-popup">
+              <div class="card">
+                <div class="card-header card-header-primary">
+                  <h4 class="card-title">
+                    Login
+                  </h4>
+                </div>
+                <div class="card-body">
+
+                  <h6 class="card-category">
+                    {% if msg %}
+                    <span class="text-danger">{{ msg | safe }}</span>
+                    {% else %}
+                    Add your credentials
+                    {% endif %}
+                  </h6>
+                  <br />
+                  <form role="form" method="post" action="">
+                    {% csrf_token %}
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label class="bmd-label-floating">Username</label>
+                          {{ form.username }}
+                        </div>
+                      </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <label class="bmd-label-floating">Password</label>
+                          {{ form.password }}
+                        </div>
+                      </div>
+                    </div>
+                    <br />
+                    <button type="submit" name="login" class="btn btn-primary pull-left">Login</button>
+                    <div class="clearfix"></div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <img src="/static/assets/img/ambipower-login-ambicon.png" class="rounded float-left" alt="ambicon_logo"
+          width="100" height="85">
+        <img src="/static/assets/img/ambipower-login-ambipower.png" class="rounded float-left" alt="ambipower_logo"
+          width="100" height="85">
+        <img src="/static/assets/img/ambipower-login-ambisecure.png" class="rounded float-left" alt="ambisecure_logo"
+          width="100" height="85">
+        <img src="/static/assets/img/ambipower-login-logo-ambipay.png" class="rounded float-left" alt="ambipay_logo"
+          width="100" height="85">
+        <img src="/static/assets/img/ambipower-login-ambiautomation.png" class="rounded float-left"
+          alt="ambiautomation_logo" width="100" height="85">
+        <img src="/static/assets/img/ambipower-login-ambiIoT.png" class="rounded float-left" alt="ambiIoT_logo"
+          width="100" height="85">
+        <img src="/static/assets/img/ambipower-login-mii.png" class="rounded float-right mx-10" alt="ambimii_logo"
+          width="130" height="65">
+        {% include 'includes/footer.html' %}
+      </div>
+    </div>
+  </div>
+
+  {% include 'includes/scripts.html' %}
+
+  {% include 'includes/scripts-sidebar.html' %}
+
+</body>
+
+</html>

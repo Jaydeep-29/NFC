@@ -1,0 +1,605 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} User List {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+  #customer_table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #6a7383;
+    color: white;
+  }
+</style>
+
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+
+
+  /* The popup form - hidden by default */
+  .form-popup {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    right: 15px;
+    border: 2px solid #727373;
+    z-index: 9;
+    width: 500px;
+
+  }
+
+  /* Add styles to the form container */
+  .form-container {
+    max-width: 150vh;
+    padding: 10px;
+    background-color: white;
+  }
+
+  /* Full-width input fields */
+  .form-container input[type=text],
+  .form-container input[type=password],
+  .form-container input[type=email],
+  .form-container input[type=number] {
+    width: 100%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    border: none;
+    background: #f1f1f1;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
+  /* When the inputs get focus, do something */
+  .form-container input[type=text]:focus,
+  .form-container input[type=password]:focus,
+  .form-container input[type=email]:focus,
+  .form-container input[type=number]:focus {
+    background-color: #ddd;
+    outline: none;
+  }
+
+  /* Set a style for the submit/login button */
+  .form-container .btn {
+    background-color: #04AA6D;
+    color: white;
+    padding: 16px 20px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+
+  /* Add a grey background color to the cancel button */
+  .form-container .cancel {
+    background-color: #6a7383;
+  }
+
+  .dropdown {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0 22px 0;
+    border: none;
+    background: #e0dcdc;
+  }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+{% comment %} {{ request.session.job_add }}
+{{ request.session.job_edit }}
+{{ request.session.job_delete }}
+{{ request.session.job_view }}
+{{ request.session.user_role }}
+{{ request.session.contract }}
+{{ request.session.contract_name }}
+{{ request.session.total_level }} {% endcomment %}
+
+<div class="row">
+  <div class="col-md-6">
+
+    {% if request.session.add_user_add %}
+    <button type="button" id='adduser' onclick="openForm()" class="btn  btn-light btn-sm ">
+      Create User
+    </button>
+    {% else %}
+    {% endif %}
+
+    {% if request.session.add_user_add %}
+    <button type="button" class="btn  btn-light btn-sm" data-toggle="modal" data-target="#uploadModal">Add Multiple
+      user</button>
+    {% else %}
+    {% endif %}
+  </div>
+
+  <div class="col-md-12">
+    <div class="card card-plain">
+      <div class="card-header card-header-primary">
+        <h4 class="card-title mt-0">Admin Users</h4>
+      </div>
+      <div class="card-body">
+        <div id="uploadModal" class="modal fade" role="dialog">
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <!-- <h4 class="modal-title">File upload form</h4> -->
+              </div>
+              <div class="modal-body">
+                <!-- Form -->
+                <form method='post' action="{% url 'upload_csv_user' %}" enctype="multipart/form-data"> {% csrf_token %}
+                  Select file : <input type='file' name='csv_file' id='file' class='form-control'><br>
+
+                  <div class="col-md-6">
+                    <label for="role">User Role*</label>
+                    <select class="form-control dropdown" name="lvl">
+                      <option value='null' hidden selected disabled>Select Role</option>
+                      {% for lvl in user_lvl %}
+                      <option value={{ lvl|cut:" " }} >{{ lvl }} </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+
+                  <input type='submit' class='btn btn-info' value='Upload' id='btn_upload'>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End Modal -->
+        <div class="form-popup" id="formPopup">
+          <form class="form-container user" method="post" style="overflow: scroll; height: 42vh;" id="boder-form">
+            {% csrf_token %}
+            <input type="hidden" name="userid" id="userid" />
+            <div class="container">
+              <h3>User</h3>
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="name">Name*</label>
+                  <input type="text" class="txtUserName border rounded" id="uname" placeholder="Enter Name" required>
+                  <span id="unameSpan" style="display: none;color: red;">Please Enter Name</span>
+
+                </div>
+
+                <div class="col-md-6">
+                  <label for="phone">Phone*</label>
+                  <input type="number" class="txtUserPhone border rounded" id="uphone" placeholder="Enter Phone">
+                  <span id="uphoneSpan" style="display: none;color: red;"> Invalid Phone Number</span>
+
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="email">Email*</label>
+                  <input type="email" class="txtUserEmail border rounded" id="uemail" placeholder="Enter Email">
+                  <span id="uemailSpan" style="display: none;color: red;">Invalid Email Address</span>
+
+                </div>
+
+                <div class="col-md-6">
+                  <label for="status">Status</label>
+                  <select id="ustatus" class="dropdown">
+                    <option value="Inactive">Inactive</option>
+                    <option value="Active" selected>Active</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="role">User Role*</label>
+                  <select id="urole" class="form-control dropdown">
+                    <option value='null' hidden selected disabled>Select Role</option>
+                    {% for lvl in user_lvl %}
+                    <option value={{ lvl }}>{{ lvl }} </option>
+                    {% endfor %}
+                  </select>
+                  <span id="uroleSpan" style="display: none;color: red;">Please Select User Role</span>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="password">Password*</label>
+                  <input type="password" class="txtUserPassword border rounded" id="upassword" placeholder="Enter Password">
+                  <span id="upasswordSpan" style="display: none;color: red;">Please Enter Password</span>
+                </div>
+
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <label for="password2"> Confirm Password*</label>
+                  <input type="password" class="txtUserPassword2 border rounded" id="upassword2"
+                    placeholder="Enter Confirm Password">
+                  <span id="upassword3Span" style="display: none;color: red;"> Password did not match</span>
+                </div>
+              </div>
+            </div>
+            <div class="row" id="adduser">
+              <div class="col-md-6"><button type="submit" class="btn" id="submitform">Submit</button> </div>
+              <div class="col-md-6"><button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <table class="table table-success table-striped" id="customer_table">
+          <thead>
+            <th scope="col">
+              Sr. No.
+            </th>
+            <th scope="col">
+              Name
+            </th>
+            <th scope="col">
+              Phone
+            </th>
+            <th scope="col">
+              Email
+            </th>
+            <th scope="col">
+              Role
+            </th>
+            <th scope="col">
+              Status
+            </th>
+            <th scope="col">
+              Created By
+            </th>
+            <th scope="col">
+              Created Date
+            </th>
+            <th scope="col">
+              Updated By
+            </th>
+            <th scope="col">
+              Updated Date
+            </th>
+            <th scope="col">
+              Action
+            </th>
+          </thead>
+          <tbody id='tbody'>
+            {% for user in users %}
+            <tr>
+              <td>{{user.admin_user_id}}</td>
+              <td>{{user.name}}</td>
+              <td>{{user.phone}}</td>
+              <td>{{user.email}}</td>
+              <td>{{user.user_role}}</td>
+              <td>{{user.status}}</td>
+              <td>{{user.created_by}}</td>
+              <td>{{user.created_date}}</td>
+              <td>{{user.updated_by}}</td>
+              <td>{{user.updated_date}}</td>
+              <td>
+                <!-- <button type="button" data-sid="{{user.id}}" class="btn btn-success btn-sm btn-edit">
+                    <i class="fa fa-edit" aria-hidden="true"></i>
+                  </button>
+
+                  <button type="button" data-sid="{{user.id}}" class="btn btn-danger btn-sm btn-delete">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                  </button> -->
+
+                {% if request.session.add_user_edit %}
+                <button type="button" data-level="{{user.user_role}}" data-sid="{{user.id}}"
+                  class="btn btn-success btn-sm btn-edit">
+                  <i class="fa fa-edit" aria-hidden="true"></i>
+                </button>
+                {% else %}
+                {% endif %}
+
+                {% if request.session.add_user_delete %}
+                <button type="button" data-level="{{user.user_role}}" data-sid="{{user.id}}"
+                  class="btn btn-danger btn-sm btn-delete">
+                  <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+                {% else %}
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+
+  var current_level = "{{request.session.user_role}}"
+  var tot_level = "{{request.session.total_level}}"
+
+
+  var ls_option = "";
+  for (let i = 1; i <= tot_level; i++) {
+    if ((i > getLevel(current_level)) && (getLevel(current_level) != 1)) {
+      if (ls_option == "") {
+        ls_option = "<option val='Level " + i + "'>" + "Level " + i + "</option>"
+      } else {
+        ls_option = ls_option + "<option val='Level " + i + "'> Level" + i + "</option>"
+      }
+    }
+  }
+
+  if (ls_option.length > 0) {
+    $("#urole").empty();
+    $("#urole").append(ls_option);
+  }
+
+  //alert(ls_option)
+
+  //alert("{{request.session.contract}}")
+  //alert(current_level);
+  //alert(tot_level);
+
+  // insert data in table
+  $(document).ready(function () {
+    var a = "{{request.session.add_user_add}}";
+
+    $('#submitform').click(function (e) {
+      var isValid = formValidate();
+      if (isValid) {
+        var output = "";
+        var csr = $("input[name=csrfmiddlewaretoken]").val();
+        var uid = $('#userid').val();
+        var txtUserName = $('#uname').val();
+        var txtUserEmail = $('#uemail').val();
+        var txtUserRole = $.trim($('#urole').find(":selected").text())
+        console.log(txtUserRole, "role")
+
+        //var txtUserRole = 'L4'
+
+        var txtUserPassword = $('#upassword').val();
+        var txtUserphone = $('#uphone').val();
+        var txtUserStatus = $('#ustatus').val();
+        var txtUserDate = $('#ucdate').val();
+        var txtUserUDate = $('#uudate').val();
+        var txtUserPassword2 = $('#upassword2').val();
+        
+
+        console.log(csr)
+        console.log(uid)
+        console.log(txtUserName)
+        console.log(txtUserEmail)
+        console.log(txtUserRole)
+        console.log(txtUserPassword)
+        console.log(txtUserphone)
+        console.log(txtUserStatus)
+
+        if (txtUserName != "" && txtUserEmail != "" && txtUserPassword != "" && (txtUserPassword == txtUserPassword2)) {
+          mydata = {
+            uname: txtUserName, uemail: txtUserEmail, urole: txtUserRole, upassword: txtUserPassword, uphone: txtUserphone,
+            ustatus: txtUserStatus, userid: uid, csrfmiddlewaretoken: csr, upassword2: txtUserPassword2
+          }
+          $.ajax({
+            url: "{% url 'admin_user_add' %}",
+            method: "POST",
+            //contentType: 'application/json',
+            data: mydata,
+            success: function (data, status, xhr) {
+              //console.log(data.customer_data);
+              x = data.user_data
+              if (data.status == "save") {
+                for (i = 0; i < x.length; i++) {
+                  output += "<tr><td>" + x[i].admin_user_id + "</td><td>" + x[i].name + "</td><td>" + x[i].phone + "</td><td>" + x[i].email + "</td><td>" + x[i].user_role + "</td><td>" + x[i].status
+                    + "</td><td>" + x[i].created_by + "</td><td>" + x[i].created_date + "</td><td>" + x[i].updated_by + "</td><td>" + x[i].updated_date + "</td><td> <button type='button' data-sid=" + x[i].id
+                    + " class='btn btn-success btn-sm btn-edit'> <i class='fa fa-edit' aria-hidden='true'></i>  <button type='button' data-sid="
+                    + x[i].id + " class='btn btn-danger btn-sm btn-delete'> <i class='fa fa-trash' aria-hidden='true'></i> </button>"
+                }
+                $("#tbody").html(output);
+                $("#userid").val('');
+                $("form")[1].reset();
+                location.reload();
+                $("#formPopup").hide()
+              }
+            },
+            error: function (xhr, status, error) {
+              console.log(error)
+            }
+          });
+        } e.preventDefault();
+      } else {
+        e.preventDefault();
+      }
+    });
+
+  })
+
+  // delete data from table
+  $("tbody").on("click", ".btn-delete", function () {
+    if (confirm("Delete Record?") == true)
+
+    var id = $(this).attr("data-sid");
+    var user_level = getLevel($(this).attr("data-level"));
+    var current_user_level = getLevel("{{request.session.user_role}}");
+    //alert(current_user_level)
+
+    if (current_user_level >= user_level && current_user_level != 1) {
+      alert("You Do Not have not enough rights!!!!");
+      return false;
+    } else {
+      var csr = $("input[name=csrfmiddlewaretoken]").val();
+      //console.log(id);
+
+      mydata = { 'uid': id, csrfmiddlewaretoken: csr };
+      mythis = this
+      $.ajax({
+        url: "{% url 'admin_user_delete' %}",
+        method: "POST",
+        data: mydata,
+        success: function (data) {
+          //console.log(data);
+          if (data.status == 1) {
+            console.log("delete successfully");
+            $(mythis).closest("tr").fadeOut();
+          }
+
+          if (data.status == 0) {
+            console.log("unable to delete data")
+          }
+
+        },
+      });
+    }
+
+  });
+
+  // edit data from table
+  $("tbody").on("click", ".btn-edit", function () {
+    var id = $(this).attr("data-sid");
+    var user_level = getLevel($(this).attr("data-level"));
+    var current_user_level = getLevel("{{request.session.user_role}}");
+
+    if (current_user_level >= user_level && current_user_level != 1) {
+      alert("You Do Not have not enough rights!!!!");
+      return false;
+    } else {
+
+      var csr = $("input[name=csrfmiddlewaretoken]").val();
+      console.log(id);
+      mydata = { 'uid': id, csrfmiddlewaretoken: csr };
+      $.ajax({
+        url: "{% url 'admin_user_edit' %}",
+        method: "POST",
+        data: mydata,
+        success: function (data) {
+          console.log(data);
+          $("#formPopup").show()
+          $("#userid").val(data.id);
+          $("#uname").val(data.name);
+          $("#uphone").val(data.phone);
+          $("#uemail").val(data.email);
+          $("#upassword").val(data.password);
+          $("#urole").val(data.user_role);
+          $("#ustatus").val(data.status);
+          $("#upassword2").val(data.password);
+          //alert(data.user_role)
+
+          if ($("#userid").val() != null) {
+            $("#uemail").attr('disabled', 'disabled');
+          }
+
+          console.log(data.id)
+
+
+        },
+      });
+    }
+
+  });
+
+  function formValidate() {
+    var returnValue = false;
+    var pattern = /^\b[A-Z0-9._%-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b$/i
+    {
+      if ($("#uname").val() == "") {
+        $('#unameSpan').show();
+      }
+      else {
+        $('#unameSpan').hide();
+      }
+    }
+
+    {
+      if ($('#uphone').val().length != 10) {
+        $('#uphoneSpan').show();
+      }
+      else {
+        $('#uphoneSpan').hide();
+      }
+    }
+
+    {
+
+      if (pattern.test($("#uemail").val())) {
+        $('#uemailSpan').hide();
+      } else {
+        $('#uemailSpan').show();
+      }
+    }
+
+    {
+      if ($("#urole").val() == null) {
+        $('#uroleSpan').show();
+      }
+      else {
+        $('#uroleSpan').hide();
+      }
+    }
+
+    {
+      if ($("#upassword").val() == "") {
+        $('#upasswordSpan').show();
+      }
+      else {
+        $('#upasswordSpan').hide();
+      }
+    }
+
+    {
+      if ($("#upassword").val() != $("#upassword2").val()) {
+        $('#upassword3Span').show();
+
+      }
+      else {
+        $('#upassword3Span').hide();
+      }
+    }
+    if ($("#uname").val() != "" && $("#urole").val() != null && $("#uphone").val().length == 10 && $("#uemail").val() != "" && $("#upassword").val() != "" && ($("#upassword").val() == ($("#upassword2").val()))) {
+      $('#unameSpan').hide();
+      $('#uroleSpan').hide();
+      $('#uphoneSpan').hide();
+      $('#uemailSpan').hide();
+      $('#upasswordSpan').hide();
+      $('#upassword3Span').hide();
+
+      return true;
+    }
+
+    return returnValue;
+  }
+
+
+</script>
+
+
+</script>
+
+<script>
+  function openForm() {
+    document.getElementById("formPopup").style.display = "block";
+  }
+
+  function closeForm() {
+    document.getElementById("formPopup").style.display = "none";
+  }
+
+  $('#adduser').click(function (e) {
+    $("form")[1].reset();
+    $("#uemail").attr('disabled', false);
+  });
+
+
+
+</script>
+
+{% endblock javascripts %}

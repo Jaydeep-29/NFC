@@ -1,0 +1,209 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} User List {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+  #customer_table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #6a7383;
+    color: white;
+  }
+</style>
+
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+
+
+  /* The popup form - hidden by default */
+  .form-popup {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    right: 15px;
+    border: 2px solid #727373;
+    z-index: 9;
+    width: 500px;
+
+  }
+
+  /* Add styles to the form container */
+  .form-container {
+    max-width: 150vh;
+    padding: 10px;
+    background-color: white;
+  }
+
+  /* Full-width input fields */
+  .form-container input[type=text],
+  .form-container input[type=password],
+  .form-container input[type=email],
+  .form-container input[type=number] {
+    width: 100%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    border: none;
+    background: #f1f1f1;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
+  /* When the inputs get focus, do something */
+  .form-container input[type=text]:focus,
+  .form-container input[type=password]:focus,
+  .form-container input[type=email]:focus,
+  .form-container input[type=number]:focus {
+    background-color: #ddd;
+    outline: none;
+  }
+
+  /* Set a style for the submit/login button */
+  .form-container .btn {
+    background-color: #04AA6D;
+    color: white;
+    padding: 16px 20px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 10px;
+    opacity: 0.8;
+  }
+
+  /* Add a grey background color to the cancel button */
+  .form-container .cancel {
+    background-color: #6a7383;
+  }
+
+  .dropdown {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0 22px 0;
+    border: none;
+    background: #e0dcdc;
+  }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="row" id="tablediv">
+  <div class="col-md-12">
+    <div class="card card-plain">
+      <div class="card-header card-header-primary">
+        <h4 class="card-title mt-0"> Super Admin User</h4>
+      </div>
+      <div class="card-body">
+        <table class="table table-success table-striped" id="customer_table">
+          <thead>
+            <th scope="col">
+              Sr No.
+            </th>
+            <th scope="col">
+              UID
+            </th>
+            <th scope="col">
+              Created Date
+            </th>
+            <th scope="col">
+              Location
+            </th>
+            <th scope="col">
+              Action
+            </th>
+          </thead>
+          <tbody id='tbody'>
+            {% for nfc_detail in nfc_details %}
+            <tr>
+              <td>{{forloop.counter}}</td>
+              <td>{{nfc_detail.uid}}</td>
+              <td>{{nfc_detail.created_date}}</td>
+              <td> <button type="button" data-lat="{{nfc_detail.latitude}}" data-long="{{nfc_detail.longitude}}" class="btn btn-success btn-sm mapbtn">
+                <i class="fa fa-map-marker" aria-hidden="true"></i>
+              </button></td>
+              <td>
+                <button type="button" data-sid="{{nfc_detail.id}}" class="btn btn-danger btn-sm btn-delete mapbtn">
+                  <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div style="width: 100%; text-align: right;display: flex;justify-content: end;">
+<button type="button" id="closebtn" class="btn btn-closebtn btn-sm" style="display:none;">
+  <i class="fa fa-close" aria-hidden="true"></i>
+</button>
+</div>
+<div id="map" style="position:fixed ; width:100%; height:100vh; z-index:100; display:none;">
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMM_FAbP7oa6l2JQ_saQxuB9DTx-GoWhM"></script>
+<script>
+  $(".mapbtn").click(function () {
+    var lat = $(this).attr("data-lat");
+    var long = $(this).attr("data-long");
+    demo.initGoogleMaps(lat,long);
+    $("#map").css("display","block");
+    $("#tablediv").css("display","none");
+    $("#closebtn").css("display","block");
+
+  });
+
+  $("#closebtn").click(function () {
+    $("#map").css("display","none");
+    $("#tablediv").css("display","block");
+    $("#closebtn").css("display","none");
+
+  });
+</script>
+<script>
+  // delete data from table
+  {% comment %} $("tbody").on("click", ".btn-delete", function () {
+    if (confirm("Delete Record?") == true)
+      var id = $(this).attr("data-sid");
+    var csr = $("input[name=csrfmiddlewaretoken]").val();
+    //console.log(id);
+    mydata = { 'uid': id, csrfmiddlewaretoken: csr };
+    mythis = this
+    $.ajax({
+      url: "{% url 'user_delete' %}",
+      method: "POST",
+      data: mydata,
+      success: function (data) {
+        //console.log(data);
+        if (data.status == 1) {
+          console.log("delete successfully");
+          $(mythis).closest("tr").fadeOut();
+        }
+
+        if (data.status == 0) {
+          console.log("unable to delete data")
+        }
+
+      },
+    });
+
+  }); {% endcomment %}
+
+</script>
+{% endblock javascripts %}

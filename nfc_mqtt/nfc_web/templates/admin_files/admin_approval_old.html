@@ -1,0 +1,487 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} User List {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+  #customer_table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #6a7383;
+    color: white;
+  }
+</style>
+
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
+  /* div#col {
+    max-width: 10%;
+  }
+
+  #col p {
+    background-color: #fff;
+    text-align: center;
+  } */
+
+  .custom-control-input:checked~.form-check-label::before {
+    color: #fff;
+    border-color: #7B1FA2;
+  }
+
+  .form-check-input:checked~.form-check-label::before {
+    background-color: red;
+  }
+
+  .form-check-input:checked~.form-check-label::before {
+    background-color: green;
+  }
+
+  /* .radio  {
+    padding-top: 15px;
+  }
+
+  .radio {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #D98E8E;
+    border-radius: 50%;
+    outline: none;
+  }
+
+  .radio:before {
+    content: '';
+    display: block;
+    width: 50%;
+    height: 50%;
+    margin: 21% 27%;
+    border-radius: 50%;
+    border: 1px solid #D98E8E;
+  }
+
+  .radio:checked:before {
+    background: #D98E8E;
+  } */
+
+
+  /* responsive */
+  @media(max-width:991px) {
+    div#col {
+      max-width: unset;
+    }
+
+    .top-btn div#col {
+      max-width: unset;
+    }
+
+  }
+
+  @media(max-width:767px) {
+    div#col {
+      max-width: unset;
+    }
+
+    .question-first {
+      padding: 20px;
+    }
+
+    h1.main-title {
+      padding: 20px;
+      font-size: 22px;
+    }
+
+    button {
+      font-size: 13px !important;
+    }
+  }
+
+  @media(max-width:480px) {
+    img {
+      width: 100%;
+    }
+  }
+
+  */
+
+  /* question pop-up css */
+  .question-first {
+    padding: 20px;
+  }
+
+  .question-first ul {
+    padding-left: 22px;
+    list-style: number;
+  }
+
+  .question-first {
+    padding: 40px;
+  }
+
+  .que_pop_up {
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+    overflow: hidden;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #000000;
+    text-align: left;
+    background-color: #fff;
+    display: block;
+    height: 100vh;
+  }
+</style>
+{% endblock stylesheets %}
+{% block content %}
+<div class="row">
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalScrollable">
+    Launch demo modal
+  </button>
+  <div class="col-md-12">
+    <div class="card card-plain">
+      <div class="card-header card-header-primary">
+        <h4 class="card-title mt-0">Approvals</h4>
+      </div>
+      <div class="card-body">
+
+        <!--model pop up start-->
+        <div class="modal fade" id="exampleModalScrollable" tabindex="-1" role="dialog"
+          aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalScrollableTitle">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div>
+                  <ul>
+                    <li>
+                      <div class="first">
+                        <p>DTR Number</p>
+                        <div class="number">
+                          <div class="row">
+                            <div class="col" id="col">
+                              <p>OLD </p>
+                              <p>8510</p>
+                            </div>
+                            <div class="col" id="col">
+                              <p>New </p>
+                              <p>9060</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
+                              value="option1"> Approve
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2"
+                              value="option2"> Reject
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="first" id="two">
+                        <p>Feeder number</p>
+                        <div class="number">
+                          <div class="row">
+                            <div class="col" id="col">
+                              <p>OLD </p>
+                              <p>35510</p>
+                            </div>
+                            <div class="col" id="col">
+                              <p>New </p>
+                              <p>45660</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
+                              value="option1"> Approve
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2"
+                              value="option2"> Reject
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+
+                    <li>
+                      <div class="first" id="third">
+                        <p>Status of Old Meter</p>
+                        <div class="number">
+                          <!-- <img src="https://5.imimg.com/data5/GF/JX/MY-11248556/static-electricity-meter-500x500.jpg"> -->
+                          <div class="row">
+                            <div class="col" id="col">
+                              <p>Status</p>
+                            </div>
+                            <div class="col" id="col">
+                              <p>Meter Burnt</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
+                              value="option1"> Approve
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2"
+                              value="option2"> Reject
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+
+                    <li>
+                      <div class="first" id="four">
+                        <p>Reading of Old Meter</p>
+                        <div class="number">
+                          <!-- <img src="https://5.imimg.com/data5/GF/JX/MY-11248556/static-electricity-meter-500x500.jpg"> -->
+                          <div class="row">
+                            <div class="col" id="col">
+                              <p>Reading</p>
+                            </div>
+                            <div class="col" id="col">
+                              <p>16,00.19</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
+                              value="option1"> Approve
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2"
+                              value="option2"> Reject
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+
+                    <li>
+                      <div class="first" id="fifth">
+                        <p>Serial number of New Meter</p>
+                        <div class="number">
+                          <!-- <img src="https://5.imimg.com/data5/GF/JX/MY-11248556/static-electricity-meter-500x500.jpg"> -->
+                          <div class="row">
+                            <div class="col" id="col">
+                              <p>Serial No.</p>
+                            </div>
+                            <div class="col" id="col">
+                              <p>X1257170</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
+                              value="option1"> Approve
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2"
+                              value="option2"> Reject
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="first" id="six">
+                        <p>Reading of New Meter</p>
+                        <div class="number">
+                          <!-- <img src="https://5.imimg.com/data5/GF/JX/MY-11248556/static-electricity-meter-500x500.jpg"> -->
+                          <div class="row">
+                            <div class="col" id="col">
+                              <p>Reading</p>
+                            </div>
+                            <div class="col" id="col">
+                              <p>00,19.19</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1"
+                              value="option1"> Approve
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                        <div class="form-check form-check-radio form-check-inline">
+                          <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2"
+                              value="option2"> Reject
+                            <span class="circle">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    </li>
+
+                  </ul>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!--model pop up end-->
+        <table class="table table-success table-striped" id="customer_table">
+          <thead>
+            <th scope="col">
+              Job ID
+            </th>
+            <th scope="col">
+              Job Name
+            </th>
+            <th scope="col">
+              Location
+            </th>
+            <th scope="col">
+              Status
+            </th>
+            <th scope="col">
+              Job Done By
+            </th>
+            <th scope="col">
+              Assigned To
+            </th>
+            <th scope="col">
+              Action
+            </th>
+          </thead>
+          <tbody id='tbody'>
+            {% for job in job_data %}
+            <tr>
+              <td>{{job.id}}</td>
+              <td>{{job.job_name}}</td>
+              <td>{{job.address}}</td>
+              <td>{{job.approve_status}}</td>
+              <td>{{job.4}}</td>
+              <td>{{job.5}}</td>
+              <td>
+                <button type="button" data-sid="{{job.0}}" data-assignto="{{job.assign_to}}" id="edit_job_data"
+                  class="btn btn-success btn-sm btn-edit">
+                  <i class="fa fa-edit" aria-hidden="true"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+  // edit data from table
+  $("tbody").on("click", ".btn-edit", function () {
+    var id = $(this).attr("data-sid");
+
+    var csr = $("input[name=csrfmiddlewaretoken]").val();
+    mydata = { 'jobid': id, csrfmiddlewaretoken: csr };
+    $.ajax({
+      url: "{% url 'edit_job' %}",
+      method: "POST",
+      data: mydata,
+      success: function (data) {
+        console.log(data);
+
+      },
+    });
+
+  });
+
+</script>
+
+
+</script>
+
+<script>
+  function openForm() {
+    document.getElementById("formPopup").style.display = "block";
+  }
+
+  function closeForm() {
+    document.getElementById("formPopup").style.display = "none";
+  }
+
+
+
+
+
+</script>
+
+{% endblock javascripts %}

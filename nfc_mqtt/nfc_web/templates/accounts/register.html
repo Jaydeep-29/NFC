@@ -1,0 +1,180 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Login {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+.form-container {
+max-width: 600vh;
+padding: 10px;
+background-color: white;
+}
+
+/* Full-width input fields */
+.form-container input[type=text],
+.form-container input[type=password] {
+width: 100%;
+padding: 15px;
+margin: 5px 0 22px 0;
+border: none;
+background: #f1f1f1;
+}
+
+/* When the inputs get focus, do something */
+.form-container input[type=text]:focus,
+.form-container input[type=password]:focus {
+background-color: #ddd;
+outline: none;
+}
+
+/* Set a style for the submit/login button */
+.form-container .btn {
+background-color: #04AA6D;
+color: white;
+padding: 16px 20px;
+border: none;
+cursor: pointer;
+width: 100%;
+margin-bottom: 10px;
+opacity: 0.8;
+}
+
+/* Add a grey background color to the cancel button */
+.form-container .cancel {
+background-color: #6a7383;
+}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-header card-header-primary">
+        <h4 class="card-title">
+          Create Account
+        </h4>
+      </div>
+      <div class="card-body">
+
+        <h6 class="card-category">
+          {% if msg %}
+          <span class="text-danger">{{ msg | safe }}</span>
+          {% else %}
+          Add your credentials
+          {% endif %}
+        </h6>
+
+        <br />
+
+        {% if success %}
+
+        <p class="">
+          Please <a href={% url 'login' %} class="text-black text-small">authenticate</a> using the new account.
+        </p>
+
+        {% else %}
+        <!-- <form role="form" method="post" action=""> -->
+        <form class="form-container " method="post" style="overflow: scroll; height: 68vh;">
+
+          {% csrf_token %}
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="bmd-label-floating">Username</label>
+                {{ form.username }}
+              </div>
+            </div>
+          </div>
+          <span class="text-danger">{{ form.username.errors }}</span>
+
+          <br />
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="bmd-label-floating">Email</label>
+                {{ form.email }}
+              </div>
+            </div>
+          </div>
+          <span class="text-danger">{{ form.email.errors }}</span>
+
+          <br />
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="bmd-label-floating">Password</label>
+                {{ form.password1 }}
+              </div>
+            </div>
+          </div>
+          <span class="text-danger">{{ form.password1.errors }}</span>
+
+          <br />
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="bmd-label-floating">Password Check</label>
+                {{ form.password2 }}
+              </div>
+            </div>
+          </div>
+          <span class="text-danger">{{ form.password2.errors }}</span>
+
+          <br />
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="bmd-label-floating">Phone</label>
+                {{ form.phone }}
+              </div>
+            </div>
+          </div>
+          <span class="text-danger">{{ form.phone.errors }}</span>
+          <br />
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="bmd-label-floating">Role</label>
+                {{ form.role }}
+              </div>
+            </div>
+          </div>
+          <span class="text-danger">{{ form.role.errors }}</span>
+
+          <br />
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="bmd-label-floating">Status</label>
+                {{ form.status }}
+              </div>
+            </div>
+          </div>
+          <span class="text-danger">{{ form.status.errors }}</span>
+
+          <br />
+
+          <button type="submit" name="register" class="btn btn-primary pull-left">Register</button>
+
+          <div class="clearfix"></div>
+
+        </form>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

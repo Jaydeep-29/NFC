@@ -1,0 +1,291 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Dashboard {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<style>
+  #customer_table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #6a7383;
+    color: white;
+  }
+</style>
+
+{% endblock stylesheets %}
+
+{% block content %}
+<!-- <div class="row">
+
+  <div class="col-sm-3">
+    <div class="card card-stats mt-1">
+      <div class="card-header card-header-warning card-header-icon">
+        <div class="card-icon">
+          <i class="material-icons">content_copy</i>
+        </div>
+        <p class="card-category font-weight-bold">Approvals Pending</p>
+        <h3 class="card-title">
+          <small id=""> {{approval_pending}} </small>
+        </h3>
+      </div>
+      <div class="card-footer">
+      </div>
+    </div>
+
+    <div class="card card-stats  mt-1">
+      <div class="card-header card-header-success card-header-icon">
+        <div class="card-icon">
+          <i class="material-icons">store</i>
+        </div>
+        <p class="card-category font-weight-bold">Unassigned Jobs</p>
+        <h3 class="card-title">
+          <small id=""> {{tot_unassign_jobs}}</small>
+        </h3>
+      </div>
+      <div class="card-footer">
+      </div>
+    </div>
+
+    <div class="card card-stats mt-1">
+      <div class="card-header card-header-warning card-header-icon">
+        <div class="card-icon">
+          <i class="material-icons">info_outline</i>
+        </div>
+        <p class="card-category font-weight-bold">New Jobs</p>
+        <h3 class="card-title">
+          <small id=""> {{total_new_jobs}}</small>
+        </h3>
+      </div>
+      <div class="card-footer">
+      </div>
+    </div>
+  </div>
+  <div class="col col-sm-5">
+    <canvas id="daily_chart" style="width:100%;max-width:500px"></canvas>
+    <canvas id="overall_chart" style="width:100%;max-width:500px"></canvas>
+  </div>
+  <div class="col-sm-3">
+    <div class="card card-stats mt-1">
+      <div class="card-header card-header-success card-header-icon">
+        <div class="card-icon">
+          <i class="material-icons">store</i>
+        </div>
+        <p class="card-category font-weight-bold">{{title_total_mtr}}</p>
+        <h3 class="card-title">
+          <small id=""> {{total_today_job_done}}</small>
+        </h3>
+      </div>
+      <div class="card-footer">
+
+      </div>
+    </div>
+    <div class="card card-stats mt-1">
+      <div class="card-header card-header-warning card-header-icon">
+        <div class="card-icon">
+          <i class="material-icons">content_copy</i>
+        </div>
+        <p class="card-category font-weight-bold">{{title_ongoing_inst}}</p>
+        <h3 class="card-title">
+          <small id=""> {{tot_ongoing_inst}}</small>
+        </h3>
+      </div>
+      <div class="card-footer">
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!--main code-->
+<div class="row">
+
+  <div class="col-sm-3">
+    <div class="card card-stats mt-1">
+      <div class="card-header card-header-warning card-header-icon">
+        <div class="card-icon">
+          <i class="material-icons">content_copy</i>
+        </div>
+        <p class="card-category font-weight-bold">Approvals Pending</p>
+        <h3 class="card-title">
+          <small id=""> {{approval_pending}} </small>
+        </h3>
+      </div>
+      <div class="card-footer">
+      </div>
+    </div>
+
+    <div class="card card-stats  mt-1">
+      <div class="card-header card-header-success card-header-icon">
+        <div class="card-icon">
+          <i class="material-icons">store</i>
+        </div>
+        <p class="card-category font-weight-bold">Unassigned Jobs</p>
+        <h3 class="card-title">
+          <small id=""> {{tot_unassign_jobs}}</small>
+        </h3>
+      </div>
+      <div class="card-footer">
+      </div>
+    </div>
+
+    <div class="card card-stats mt-1">
+      <div class="card-header card-header-warning card-header-icon">
+        <div class="card-icon">
+          <i class="material-icons">info_outline</i>
+        </div>
+        <p class="card-category font-weight-bold">New Jobs</p>
+        <h3 class="card-title">
+          <small id=""> {{total_new_jobs}}</small>
+        </h3>
+      </div>
+      <div class="card-footer">
+      </div>
+    </div>
+  </div>
+  <div class="col col-sm-5">
+    <canvas id="daily_chart" style="width:100%;max-width:450px"></canvas>
+    <canvas id="overall_chart" style="width:100%;max-width:450px"></canvas>
+  </div>
+  <div class="col-sm-3">
+    <div class="card card-stats mt-1">
+      <div class="card-header card-header-success card-header-icon">
+        <div class="card-icon">
+          <i class="material-icons">store</i>
+        </div>
+        <p class="card-category font-weight-bold">{{title_total_mtr}}</p>
+        <h3 class="card-title">
+          <small id=""> {{total_today_job_done}}</small>
+        </h3>
+      </div>
+      <div class="card-footer">
+
+      </div>
+    </div>
+    <div class="card card-stats mt-1">
+      <div class="card-header card-header-warning card-header-icon">
+        <div class="card-icon">
+          <i class="material-icons">content_copy</i>
+        </div>
+        <p class="card-category font-weight-bold">{{title_ongoing_inst}}</p>
+        <h3 class="card-title">
+          <small id=""> {{tot_ongoing_inst}}</small>
+        </h3>
+      </div>
+      <div class="card-footer">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card card-plain">
+      <div class="card-header card-header-primary">
+        <h4 class="card-title mt-0"> Job Details</h4>
+      </div>
+      <div class="card-body">
+        <table class="table table-success table-striped" id="customer_table">
+          <thead>
+            <th scope="col">
+              Sr. No.
+            </th>
+            <th scope="col">
+              Job Name
+            </th>
+            <th scope="col">
+              Location
+            </th>
+            <th scope="col">
+              Assign Status
+            </th>
+            <th scope="col">
+              Job Status
+            </th>
+            <th scope="col">
+              Assigned To
+            </th>
+            <th scope="col">
+              Added date
+            </th>
+            <th scope="col">
+              Added by
+            </th>
+          </thead>
+          <tbody id='tbody'>
+            {% for job in job_data %}
+            <tr>
+              <td>{{job.1}}</td>
+              <td>{{job.2}}</td>
+              <td>{{job.3}}</td>
+              <td>{{job.4}}</td>
+              <td>{{job.5}}</td>
+              <td>{{job.6}}</td>
+              <td>{{job.7}}</td>
+              <td>{{job.8}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  var xValues = ["Total New Jobs", "Jobs Pending", "Jobs Done",];
+  var yValues = ["{{total_new_jobs}}", "{{tot_ongoing_inst}}", "{{total_today_job_done}}",];
+  var barColors = [
+    "#E1343F",
+    "#8A8A8A",
+    "#A02828",
+  ];
+
+  new Chart("overall_chart", {
+    type: "pie",
+    data: {
+      labels: xValues,
+      datasets: [{
+        backgroundColor: barColors,
+        data: yValues
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: "Daily Analysis"
+      }
+    }
+  });
+
+  // overall chart
+  var xValues = ["Total Jobs", "Jobs Done",];
+  var yValues = ["{{total_mtr_job}}", "{{tot_mtr_done}}",];
+  var barColors = [
+    "#E1343F",
+    "#A02828",
+  ];
+
+  new Chart("daily_chart", {
+    type: "pie",
+    data: {
+      labels: xValues,
+      datasets: [{
+        backgroundColor: barColors,
+        data: yValues
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: "Overall Analysis"
+      }
+    }
+  });
+</script>
+
+{% endblock javascripts %}

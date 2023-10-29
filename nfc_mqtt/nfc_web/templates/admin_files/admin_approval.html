@@ -1,0 +1,390 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} User List {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+  #customer_table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #6a7383;
+    color: white;
+  }
+</style>
+
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
+  /* div#col {
+    max-width: 10%;
+  }
+
+  #col p {
+    background-color: #fff;
+    text-align: center;
+  } */
+
+  .custom-control-input:checked~.form-check-label::before {
+    color: #fff;
+    border-color: #7B1FA2;
+  }
+
+  .form-check-input:checked~.form-check-label::before {
+    background-color: red;
+  }
+
+  .form-check-input:checked~.form-check-label::before {
+    background-color: green;
+  }
+
+  /* .radio  {
+    padding-top: 15px;
+  }
+
+  .radio {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #D98E8E;
+    border-radius: 50%;
+    outline: none;
+  }
+
+  .radio:before {
+    content: '';
+    display: block;
+    width: 50%;
+    height: 50%;
+    margin: 21% 27%;
+    border-radius: 50%;
+    border: 1px solid #D98E8E;
+  }
+
+  .radio:checked:before {
+    background: #D98E8E;
+  } */
+
+
+  /* responsive */
+  @media(max-width:991px) {
+    div#col {
+      max-width: unset;
+    }
+
+    .top-btn div#col {
+      max-width: unset;
+    }
+
+  }
+
+  @media(max-width:767px) {
+    div#col {
+      max-width: unset;
+    }
+
+    .question-first {
+      padding: 20px;
+    }
+
+    h1.main-title {
+      padding: 20px;
+      font-size: 22px;
+    }
+
+    button {
+      font-size: 13px !important;
+    }
+  }
+
+  @media(max-width:480px) {
+    img {
+      width: 100%;
+    }
+  }
+
+  */
+
+  /* question pop-up css */
+  .question-first {
+    padding: 20px;
+  }
+
+  .question-first ul {
+    padding-left: 22px;
+    list-style: number;
+  }
+
+  .question-first {
+    padding: 40px;
+  }
+</style>
+{% endblock stylesheets %}
+{% block content %}
+<div class="row">
+  <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#QueModal">
+    Launch demo modal
+  </button>  -->
+  <div class="col-md-12">
+    <div class="card card-plain">
+      <div class="card-header card-header-primary">
+        <h4 class="card-title mt-0">Approvals</h4>
+      </div>
+      <div class="card-body">
+
+        <!--model pop up start-->
+        <div class="modal fade" id="QueModal" tabindex="-1" role="dialog" aria-labelledby="QueModalTitle"
+          aria-hidden="true">
+          <div class="modal-dialog modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="QueModalTitle">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div id="quepop_up">
+
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="ans_submit">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!--model pop up end-->
+        <table class="table table-success table-striped" id="customer_table">
+          <thead>
+            <th scope="col">
+              Job ID
+            </th>
+            <th scope="col">
+              Job Name
+            </th>
+            <th scope="col">
+              Location
+            </th>
+            <th scope="col">
+              Status
+            </th>
+            {% comment %} <th scope="col">
+              Job Done By
+            </th> {% endcomment %}
+            <th scope="col">
+              Assigned To
+            </th>
+            <th scope="col">
+              Action
+            </th>
+          </thead>
+          <tbody id='tbody'>
+            {% for job in job_data %}
+            <tr>
+              <td>{{job.1}}</td>
+              <td>{{job.2}}</td>
+              <td>{{job.3}}</td>
+              <td>{{job.4}}</td>
+              <td>{{job.5}}</td>
+              {% comment %} <td>{{job.5}}</td> {% endcomment %}
+              <td>
+                <button type="button" data-sid="{{job.0}}" id="edit_job_data"
+                  class="btn-success btn-sm btn btn-approval">
+                  <i class="fa fa-edit" aria-hidden="true"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+<script>
+  // edit data from table
+  var gs_que_data = ""
+  var gs_job_id = ""
+  $("tbody").on("click", ".btn-approval", function () {
+    var id = $(this).attr("data-sid");
+    //$('#QueModal').modal('toggle');
+    mydata = { 'jobid': id };
+    $.ajax({
+      url: "{% url 'job_que' %}",
+      method: "POST",
+      headers: {
+        "X-CSRFToken": '{{ csrf_token }}'
+      },
+      data: mydata,
+      cache: true,
+      success: function (data) {
+        var objData = data.data;
+        var ls_tab_data;
+        gs_que_data = JSON.stringify(data)
+        $('#QueModal').modal('toggle');
+        // console.log(jdata);
+        console.log(objData);
+        gs_que_length = (objData.length)
+        for (var i = 0; i < objData.length; i++) {
+
+          var ls_title = objData[i].title;
+          var ls_ans = objData[i].ans;
+          var ls_image = objData[i].image;
+          var ls_new_ans = objData[i].new_ans;
+          var ls_que_status = objData[i].que_status;
+          gs_job_id = objData[i].job_id;
+          // var ls_add_per = ls_que_status == 1 && "checked"
+          //alert(ls_que_status)
+          var ls_approve_check = (objData[i].que_status == 1) ? checked = "checked" : '';
+          var ls_approve_check1 = ls_que_status == 0 ? checked = "checked" : '';
+
+          //console.log("per",ls_approve_check)
+          // console.log("per----",ls_approve_check1)
+          //alert(ls_image)
+          //alert(ls_approve_check1)
+          //var rVal = $(`#approve${i}`).attr('checked', true);
+          //console.log(rVal)
+
+          var ls_check = ((objData[i].new_ans != null) & (objData[i].ans != null)) ? "<div class='number'><div class='row'><div class='col' id='col'><p>OLD </p><p>" + ls_ans + "</p></div><div class='col' id='col'><p>New </p><p>" + ls_new_ans + "</p></div></div>" : "<div class='number'><div class='row'><div class='col' id='col'><p>New </p><p>" + ls_new_ans + "</p></div></div>";
+
+          var ls_check_btn = "<div class='form-check form-check-radio form-check-inline'> <label class='form-check-label'> <input class='form-check-input' type='radio' " + ls_approve_check + "  name='inlineRadioOptions" + i + "' id='approve" + i + "' value='" + 0 + "'> Approve <span class='circle'> <span class='check'></span> </span> </label> </div> <div class='form-check form-check-radio form-check-inline'> <label class='form-check-label'> <input class='form-check-input' type='radio' " + ls_approve_check1 + " name='inlineRadioOptions" + i + "' id='reject" + i + "' value='" + 1 + "'> Reject <span class='circle'> <span class='check'></span> </span> </label> </div>"
+
+          var ls_image_view = (ls_image.length != 0) ? "<li><div class='first' id='third'><div class='number'><img src='" + ls_image +" 'style=width:300px;height:320px><div class='row'><div class='col' id='col'></div></div></div></div>" : ""
+          //alert(objData[i].image)
+          //alert(ls_image.length)
+          //alert(ls_image_view)
+          //alert(objData[i].image == null)
+          //console.log(objData[i].image)
+
+          if (ls_tab_data == null) {
+            //alert(ls_tab_data)
+            ls_tab_data = "<ui> <li> <div class='first'> <p>" + ls_title + "</p><div class='number'> " + ls_check + ls_check_btn + ls_image_view + " </div> </li>";
+          } else {
+            ls_tab_data = ls_tab_data + "<li> <div class='first'> <p>" + ls_title + " </p>" + ls_check + ls_check_btn + ls_image_view + " </div> </li>";
+            //alert(ls_tab_data)
+          }
+        }
+        ls_tab_data = ls_tab_data + "</ui>"
+        $("#quepop_up").html(ls_tab_data);
+       // console.log(ls_tab_data)
+      }
+    });
+
+  });
+
+
+  $('#ans_submit').on('click', function () {
+    var SQL = "";
+    var ls_data = jQuery.parseJSON(gs_que_data).data;
+    var ls_job_status = true
+    ls_job_id = gs_job_id
+    for (var i = 0; i < ls_data.length; i++) {
+      var que_status = $(`#approve${i}`).prop('checked')
+      if (que_status == false) {
+        ls_job_status = false
+        //alert(ls_job_status)
+      }
+    }
+
+    for (var i = 0; i < ls_data.length; i++) {
+    var q_status = $(`#approve${i}`).is(":checked")
+    //alert(q_status)
+    var q_id = (ls_data[i].id)
+    SQL = "UPDATE super_admin_job_question SET QUE_STATUS =" + q_status + "  WHERE ID = " + q_id + "";
+    //console.log(SQL)
+    mydata = { 'data': SQL };
+    $.ajax({
+      url: "{% url 'permission' %}",
+      method: "POST",
+      headers: {
+        "X-CSRFToken": '{{ csrf_token }}'
+      },
+      data: mydata,
+      success: function (data) {
+        //$('#perSpan').show();
+        //$('#perSpan2').hide();
+        $("#QueModal .close").click()
+        SQL = ''
+      },
+      error: function (xhr, status, error) {
+        console.log(error)
+        //$('#perSpan2').show();
+        //$('#perSpan').hide();
+        SQL = ''
+
+      }
+    });
+    event.preventDefault();
+  }
+
+  // for job status
+  if (ls_job_status == true) {
+      JOB_SQL = "UPDATE super_admin_jobs SET job_status = 'Done', approval_status = 'Done'  WHERE ID = " + ls_job_id + "";
+      console.log(JOB_SQL)
+      mydata = { 'data': JOB_SQL };
+      $.ajax({
+        url: "{% url 'permission' %}",
+        method: "POST",
+        headers: {
+          "X-CSRFToken": '{{ csrf_token }}'
+        },
+        data: mydata,
+        success: function (data) {
+          $("#QueModal .close").click()
+          SQL = ''
+        },
+        error: function (xhr, status, error) {
+          console.log(error)
+          SQL = ''
+        }
+      });
+      event.preventDefault();
+
+    } else { 
+      JOB_SQL = "UPDATE super_admin_jobs SET job_status = 'Approval Pending', approval_status = 'On Hold' WHERE ID = " + ls_job_id + "";
+      console.log(JOB_SQL)
+      mydata = { 'data': JOB_SQL };
+      $.ajax({
+        url: "{% url 'permission' %}",
+        method: "POST",
+        headers: {
+          "X-CSRFToken": '{{ csrf_token }}'
+        },
+        data: mydata,
+        success: function (data) {
+          $("#QueModal .close").click()
+          JOB_SQL = ''
+        },
+        error: function (xhr, status, error) {
+          console.log(error)
+          JOB_SQL = ''
+        }
+      });
+      event.preventDefault();
+
+    };
+
+  })
+
+</script>
+
+{% endblock javascripts %}
